@@ -1,6 +1,3 @@
-// http://jscience.org/api/index.html
-// http://commons.apache.org/proper/commons-math/
-
 @Grapes(
     @Grab(group='org.jscience', module='jscience', version='4.3.1')
 )

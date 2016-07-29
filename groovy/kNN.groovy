@@ -1,20 +1,12 @@
 @Grapes(
-    @Grab(group = 'org.apache.commons', module = 'commons-math3', version = '3.6.1')
+    value = [
+        @Grab('org.apache.commons:commons-math3:3.6.1'),
+        @Grab('org.jfree:jfreechart:1.0.19')
+    ]
 )
 import org.apache.commons.math3.ml.distance.EuclideanDistance
-@Grapes(
-    @Grab(group = 'org.apache.commons', module = 'commons-math3', version = '3.6.1')
-)
-
-import org.apache.commons.math3.ml.distance.EuclideanDistance
-@Grapes(
-    @Grab(group = 'org.apache.commons', module = 'commons-math3', version = '3.6.1')
-)
-import org.apache.commons.math3.ml.distance.EuclideanDistance
-@Grapes(
-    @Grab(group = 'org.apache.commons', module = 'commons-math3', version = '3.6.1')
-)
-import org.apache.commons.math3.ml.distance.EuclideanDistance
+import org.jfree.chart.*
+import org.jfree.data.xy.DefaultXYDataset
 
 def createDataSet() {
     [
@@ -33,12 +25,30 @@ String classify0(inX, dataSet, int k) {
     }.sort { it.second }.take(k).countBy { it.first }.max { it.value }.key
 }
 
-def dataSet = createDataSet()
-println "Data set: $dataSet"
+def fileData(String filename) {
+    def data = []
+    new File(filename).eachLine { String line ->
+        def cols = line.trim().split('\t')
+        data << new Tuple2(cols[-1], cols[0..(-2)])
+    }
+    data
+}
 
-println "Result: ${classify0([0, 0], dataSet, 3)}"
+def data = fileData('/home/cjstehno/Desktop/pyml/files/datingTestSet.txt')
 
-/*
-Data set: [[A, [1.0, 1.1]], [A, [1.0, 1.0]], [B, [0.0, 0.0]], [B, [0.0, 0.1]]]
-Result: B
- */
+def plotted = [
+    data.collect { d -> d.second[1] } as double[],
+    data.collect { d -> d.second[2] } as double[]
+] as double[][]
+
+def xyDataSet = new DefaultXYDataset()
+xyDataSet.addSeries('A', plotted)
+
+def frame = new ChartFrame('Charting', ChartFactory.createScatterPlot(
+    'Dating Test',
+    'Percentage Time Spent Playing Video Games',
+    'Liters of Ice Cream Consumed Per Week',
+    xyDataSet
+))
+frame.setSize(800, 600)
+frame.visible = true
