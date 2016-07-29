@@ -7,45 +7,65 @@
 import org.apache.commons.math3.ml.distance.EuclideanDistance
 import org.jfree.chart.*
 import org.jfree.data.xy.DefaultXYDataset
+import org.apache.commons.math3.linear.Array2DRowRealMatrix
 
 def createDataSet() {
-    [
-        new Tuple2('A', [1.0, 1.1]),
-        new Tuple2('A', [1.0, 1.0]),
-        new Tuple2('B', [0.0, 0.0]),
-        new Tuple2('B', [0.0, 0.1])
-    ]
+    new Tuple2(
+        ['A', 'A', 'B', 'B'],
+        new Array2DRowRealMatrix([
+            [1.0, 1.1],
+            [1.0, 1.0],
+            [0.0, 0.0],
+            [0.0, 0.1]
+        ] as double[][])
+    )
 }
 
 String classify0(inX, dataSet, int k) {
-    dataSet.collect { d ->
-        new Tuple2<>(
-            d.first, new EuclideanDistance().compute(d.second as double[], inX as double[])
+    def distances = []
+
+    dataSet.second.rowDimension.times { row ->
+        distances << new Tuple2(
+            dataSet.first[row],
+            new EuclideanDistance().compute(
+                dataSet.second.getRow(row),
+                inX as double[]
+            )
         )
-    }.sort { it.second }.take(k).countBy { it.first }.max { it.value }.key
+    }
+
+    distances.sort { it.second }.take(k).countBy { it.first }.max { it.value }.key
 }
 
 def fileData(String filename) {
-    def data = []
+    def groups = []
+    def rows = []
+
     new File(filename).eachLine { String line ->
         def cols = line.trim().split('\t')
-        data << new Tuple2(cols[-1], cols[0..(-2)])
+        groups << cols[-1]
+        rows << (cols[0..(-2)] as double[])
     }
-    data
+
+    new Tuple2(groups, new Array2DRowRealMatrix(rows as double[][]))
 }
 
 def data = fileData('/home/cjstehno/Desktop/pyml/files/datingTestSet.txt')
 
+def groupIndices = [:]
+data.first.eachWithIndex { g, i ->
+    if (groupIndices.containsKey(g)) {
+        groupIndices[g] << i
+    } else {
+        groupIndices[g] = [i]
+    }
+}
+
 def xyDataSet = new DefaultXYDataset()
 
-data.groupBy { it.first }.each { g,dat->
-    xyDataSet.addSeries(
-        g,
-        [
-            dat.collect { d -> d.second[1] } as double[],
-            dat.collect { d -> d.second[2] } as double[]
-        ] as double[][]
-    )
+groupIndices.each { g, indices ->
+    def groupMtx = data.second.getSubMatrix(indices as int[], [0, 1, 2] as int[])
+    xyDataSet.addSeries(g, [groupMtx.getColumn(1), groupMtx.getColumn(2)] as double[][])
 }
 
 def frame = new ChartFrame('Charting', ChartFactory.createScatterPlot(
