@@ -31,13 +31,13 @@ def file2matrix(filename):
         line = line.strip()
         listFromLine = line.split('\t')
         returnMat[index,:] = listFromLine[0:3]
-        classLabelVector.append(listFromLine[-1])
+        classLabelVector.append(int(listFromLine[-1]))
         index += 1
     return returnMat,classLabelVector
 
-datingDataMat, datingLabels = file2matrix('/home/cjstehno/Desktop/pyml/files/datingTestSet.txt')
+datingDataMat, datingLabels = file2matrix('/home/cjstehno/Desktop/pyml/files/datingTestSet2.txt')
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
-ax.scatter(datingDataMat[:,1], datingDataMat[:,2])
+ax.scatter(datingDataMat[:,1], datingDataMat[:,2], 15.0*array(datingLabels), 15.0*array(datingLabels))
 plt.show()

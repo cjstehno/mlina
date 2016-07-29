@@ -36,13 +36,17 @@ def fileData(String filename) {
 
 def data = fileData('/home/cjstehno/Desktop/pyml/files/datingTestSet.txt')
 
-def plotted = [
-    data.collect { d -> d.second[1] } as double[],
-    data.collect { d -> d.second[2] } as double[]
-] as double[][]
-
 def xyDataSet = new DefaultXYDataset()
-xyDataSet.addSeries('A', plotted)
+
+data.groupBy { it.first }.each { g,dat->
+    xyDataSet.addSeries(
+        g,
+        [
+            dat.collect { d -> d.second[1] } as double[],
+            dat.collect { d -> d.second[2] } as double[]
+        ] as double[][]
+    )
+}
 
 def frame = new ChartFrame('Charting', ChartFactory.createScatterPlot(
     'Dating Test',
