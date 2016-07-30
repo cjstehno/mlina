@@ -8,6 +8,7 @@ import org.apache.commons.math3.ml.distance.EuclideanDistance
 import org.jfree.chart.*
 import org.jfree.data.xy.DefaultXYDataset
 import org.apache.commons.math3.linear.Array2DRowRealMatrix
+import org.apache.commons.math3.linear.DefaultRealMatrixPreservingVisitor
 
 def createDataSet() {
     new Tuple2(
@@ -37,21 +38,26 @@ String classify0(inX, dataSet, int k) {
     distances.sort { it.second }.take(k).countBy { it.first }.max { it.value }.key
 }
 
-// FIXME: working on impl this
-def autoNorm(dataSet){
+def autoNorm(dataSet) {
     def mins = []
     def maxs = []
-    dataSet.second.columnDimension.times { c->
-        mins << dataSet.second.getColumn(c).min()
-        maxs << dataSet.second.getColumn(c).max()
+    dataSet.second.columnDimension.times { c ->
+        mins << (dataSet.second.getColumn(c) as Collection).min()
+        maxs << (dataSet.second.getColumn(c) as Collection).max()
     }
 
     def ranges = []
-    maxs.eachWithIndex { m, i->
+    maxs.eachWithIndex { m, i ->
         ranges << m - mins[i]
     }
 
-    def normData = null
+    def normData = new Array2DRowRealMatrix(dataSet.second.rowDimension, dataSet.second.columnDimension)
+
+    dataSet.second.columnDimension.times { c ->
+        normData.setColumn(c, dataSet.second.getColumn(c).collect { d ->
+            (d - mins[c]) / (maxs[c] - mins[c])
+        } as double[])
+    }
 
     [normData, ranges, mins]
 }
@@ -69,7 +75,7 @@ def fileData(String filename) {
     new Tuple2(groups, new Array2DRowRealMatrix(rows as double[][]))
 }
 
-def data = fileData('/home/cjstehno/Desktop/pyml/files/datingTestSet.txt')
+def data = fileData('/media/cjstehno/Storage/projects/mlina/files/datingTestSet.txt')
 
 def groupIndices = [:]
 data.first.eachWithIndex { g, i ->
@@ -95,5 +101,3 @@ def frame = new ChartFrame('Charting', ChartFactory.createScatterPlot(
 ))
 frame.setSize(800, 600)
 frame.visible = true
-
-println autoNorm(data)
