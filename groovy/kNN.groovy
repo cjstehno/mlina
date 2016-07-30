@@ -37,6 +37,25 @@ String classify0(inX, dataSet, int k) {
     distances.sort { it.second }.take(k).countBy { it.first }.max { it.value }.key
 }
 
+// FIXME: working on impl this
+def autoNorm(dataSet){
+    def mins = []
+    def maxs = []
+    dataSet.second.columnDimension.times { c->
+        mins << dataSet.second.getColumn(c).min()
+        maxs << dataSet.second.getColumn(c).max()
+    }
+
+    def ranges = []
+    maxs.eachWithIndex { m, i->
+        ranges << m - mins[i]
+    }
+
+    def normData = null
+
+    [normData, ranges, mins]
+}
+
 def fileData(String filename) {
     def groups = []
     def rows = []
@@ -76,3 +95,5 @@ def frame = new ChartFrame('Charting', ChartFactory.createScatterPlot(
 ))
 frame.setSize(800, 600)
 frame.visible = true
+
+println autoNorm(data)
