@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from numpy import *
+import operator
 
 
 def createDataSet():
@@ -50,12 +51,25 @@ def file2matrix(filename):
     return returnMat, classLabelVector
 
 
-datingDataMat, datingLabels = file2matrix('/media/cjstehno/Storage/projects/mlina/files/datingTestSet2.txt')
+def datingClassTest():
+    hoRatio = 0.10
+    datingDataMat, datingLabels = file2matrix('../files/datingTestSet2.txt')
+    normMat, ranges, minVals = autoNorm(datingDataMat)
+    m = normMat.shape[0]
+    numTestVecs = int(m * hoRatio)
+    errorCount = 0.0
+    for i in range(numTestVecs):
+        classifierResult = classify0(normMat[i, :], normMat[numTestVecs:m, :], datingLabels[numTestVecs:m], 3)
+        print "the classifier came back with: %d, the real answer is: %d" % (classifierResult, datingLabels[i])
+        if (classifierResult != datingLabels[i]): errorCount += 1.0
+    print "the total error rate is: %f" % (errorCount / float(numTestVecs))
+
+
+datingDataMat, datingLabels = file2matrix('../files/datingTestSet2.txt')
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.scatter(datingDataMat[:, 1], datingDataMat[:, 2], 15.0 * array(datingLabels), 15.0 * array(datingLabels))
 plt.show()
 
-a,b = createDataSet()
-print autoNorm(a)
+datingClassTest()

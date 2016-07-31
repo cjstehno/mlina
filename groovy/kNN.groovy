@@ -1,3 +1,11 @@
+import org.apache.commons.math3.linear.Array2DRowRealMatrix
+@Grapes(
+    value = [
+        @Grab('org.apache.commons:commons-math3:3.6.1'),
+        @Grab('org.jfree:jfreechart:1.0.19')
+    ]
+)
+import org.apache.commons.math3.ml.distance.EuclideanDistance
 @Grapes(
     value = [
         @Grab('org.apache.commons:commons-math3:3.6.1'),
@@ -7,8 +15,6 @@
 import org.apache.commons.math3.ml.distance.EuclideanDistance
 import org.jfree.chart.*
 import org.jfree.data.xy.DefaultXYDataset
-import org.apache.commons.math3.linear.Array2DRowRealMatrix
-import org.apache.commons.math3.linear.DefaultRealMatrixPreservingVisitor
 
 def createDataSet() {
     new Tuple2(
@@ -75,7 +81,23 @@ def fileData(String filename) {
     new Tuple2(groups, new Array2DRowRealMatrix(rows as double[][]))
 }
 
-def data = fileData('/media/cjstehno/Storage/projects/mlina/files/datingTestSet.txt')
+def datingClassTest() {
+    def hoRatio = 0.10
+    def data = fileData('../files/datingTestSet.txt')
+    def (norms, ranges, mins) = autoNorm(data)
+    int testVectors = norms.rowDimension * hoRatio
+    int errorCount = 0
+    testVectors.times { i ->
+        def classification = classify0(norms.getRow(i), new Tuple2<>(data.first, norms), 3)
+        println "Classifier came back with: ${classification}, the real answer is: ${data.first[i]}"
+        if (classification != data.first[i]) {
+            errorCount++
+        }
+    }
+    println "Total error rate: ${errorCount / (double) testVectors}"
+}
+
+def data = fileData('../files/datingTestSet.txt')
 
 def groupIndices = [:]
 data.first.eachWithIndex { g, i ->
@@ -101,3 +123,5 @@ def frame = new ChartFrame('Charting', ChartFactory.createScatterPlot(
 ))
 frame.setSize(800, 600)
 frame.visible = true
+
+datingClassTest()
