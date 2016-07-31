@@ -1,10 +1,10 @@
-import org.apache.commons.math3.linear.Array2DRowRealMatrix
 @Grapes(
     value = [
         @Grab('org.apache.commons:commons-math3:3.6.1'),
         @Grab('org.jfree:jfreechart:1.0.19')
     ]
 )
+import org.apache.commons.math3.linear.Array2DRowRealMatrix
 import org.apache.commons.math3.ml.distance.EuclideanDistance
 import org.jfree.chart.*
 import org.jfree.data.xy.DefaultXYDataset
@@ -100,7 +100,11 @@ def classifyPerson(){
     def dataSet = fileData('../files/datingTestSet.txt')
     def (normData, ranges, mins) = autoNorm(dataSet)
 
-    def classification = classify0([ffMiles, playingVg, iceCream] as double[], dataSet, 3)
+    def classification = classify0([
+        (ffMiles - mins[0])/ranges[0],
+        (playingVg - mins[1])/ ranges[1],
+        (iceCream - mins[2])/ranges[2]
+    ] as double[], dataSet, 3)
 
     console.writer().println "You will probably like this person: ${classification}"
     console.writer().flush()
