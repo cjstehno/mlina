@@ -6,13 +6,6 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix
     ]
 )
 import org.apache.commons.math3.ml.distance.EuclideanDistance
-@Grapes(
-    value = [
-        @Grab('org.apache.commons:commons-math3:3.6.1'),
-        @Grab('org.jfree:jfreechart:1.0.19')
-    ]
-)
-import org.apache.commons.math3.ml.distance.EuclideanDistance
 import org.jfree.chart.*
 import org.jfree.data.xy.DefaultXYDataset
 
@@ -97,31 +90,55 @@ def datingClassTest() {
     println "Total error rate: ${errorCount / (double) testVectors}"
 }
 
-def data = fileData('../files/datingTestSet.txt')
+def classifyPerson(){
+    Console console = Console.newInstance()
 
-def groupIndices = [:]
-data.first.eachWithIndex { g, i ->
-    if (groupIndices.containsKey(g)) {
-        groupIndices[g] << i
-    } else {
-        groupIndices[g] = [i]
-    }
+    double playingVg = prompt(console, 'Percentage of time playing video games? ')
+    double ffMiles = prompt(console, 'Frequent flier miles earned per year? ')
+    double iceCream = prompt(console, 'Liters of ice cream consumed per year? ')
+
+    def dataSet = fileData('../files/datingTestSet.txt')
+    def (normData, ranges, mins) = autoNorm(dataSet)
+
+    def classification = classify0([ffMiles, playingVg, iceCream] as double[], dataSet, 3)
+
+    console.writer().println "You will probably like this person: ${classification}"
+    console.writer().flush()
 }
 
-def xyDataSet = new DefaultXYDataset()
-
-groupIndices.each { g, indices ->
-    def groupMtx = data.second.getSubMatrix(indices as int[], [0, 1, 2] as int[])
-    xyDataSet.addSeries(g, [groupMtx.getColumn(1), groupMtx.getColumn(2)] as double[][])
+double prompt(Console console, String text){
+    console.writer().print text
+    console.writer().flush()
+    console.readLine()?.trim() as double
 }
 
-def frame = new ChartFrame('Charting', ChartFactory.createScatterPlot(
-    'Dating Test',
-    'Percentage Time Spent Playing Video Games',
-    'Liters of Ice Cream Consumed Per Week',
-    xyDataSet
-))
-frame.setSize(800, 600)
-frame.visible = true
+//def data = fileData('../files/datingTestSet.txt')
+//
+//def groupIndices = [:]
+//data.first.eachWithIndex { g, i ->
+//    if (groupIndices.containsKey(g)) {
+//        groupIndices[g] << i
+//    } else {
+//        groupIndices[g] = [i]
+//    }
+//}
+//
+//def xyDataSet = new DefaultXYDataset()
+//
+//groupIndices.each { g, indices ->
+//    def groupMtx = data.second.getSubMatrix(indices as int[], [0, 1, 2] as int[])
+//    xyDataSet.addSeries(g, [groupMtx.getColumn(1), groupMtx.getColumn(2)] as double[][])
+//}
+//
+//def frame = new ChartFrame('Charting', ChartFactory.createScatterPlot(
+//    'Dating Test',
+//    'Percentage Time Spent Playing Video Games',
+//    'Liters of Ice Cream Consumed Per Week',
+//    xyDataSet
+//))
+//frame.setSize(800, 600)
+//frame.visible = true
+//
+//datingClassTest()
 
-datingClassTest()
+classifyPerson()

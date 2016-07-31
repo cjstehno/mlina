@@ -65,11 +65,24 @@ def datingClassTest():
     print "the total error rate is: %f" % (errorCount / float(numTestVecs))
 
 
-datingDataMat, datingLabels = file2matrix('../files/datingTestSet2.txt')
+def classifyPerson():
+    resultList = ['not at all', 'in small doses', 'in large doses']
+    percentTats = float(raw_input("Percentage of time playing video games? "))
+    ffMiles = float(raw_input("Frequent flier miles earned per year? "))
+    iceCream = float(raw_input("Liters of ice cream consumed per year? "))
+    datingDataMat, datingLabels = file2matrix('../files/datingTestSet2.txt')
+    normMat,ranges, minVals = autoNorm(datingDataMat)
+    inArr = array([ffMiles, percentTats, iceCream])
+    classifierResult = classify0((inArr-minVals)/ranges, normMat, datingLabels, 3)
+    print "You will probably like this person: ", resultList[classifierResult-1]
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.scatter(datingDataMat[:, 1], datingDataMat[:, 2], 15.0 * array(datingLabels), 15.0 * array(datingLabels))
-plt.show()
+# datingDataMat, datingLabels = file2matrix('../files/datingTestSet2.txt')
+#
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# ax.scatter(datingDataMat[:, 1], datingDataMat[:, 2], 15.0 * array(datingLabels), 15.0 * array(datingLabels))
+# plt.show()
 
-datingClassTest()
+# datingClassTest()
+
+classifyPerson()
