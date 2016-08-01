@@ -17,3 +17,4 @@ Some Java libraries that came in handy:
 ## Book Errata
 
 https://manning-content.s3.amazonaws.com/download/8/94d527f-01ea-4fe5-926a-9d0b77bed50e/Harrington_MachineLearninginAction_Err2.htm
+
