@@ -31,14 +31,12 @@ def calcShannonEntropy(dataSet){
     shannonEnt
 }
 
-// FIXME: this is not working -start here
 def splitDataSet(dataSet, axis, value){
     def resultingDataSet = []
     dataSet.second.each { featVec->
         if( featVec[axis] == value){
-            def reducedFeatVec = featVec[0..axis]
-            reducedFeatVec << featVec[(axis+2)..(-1)]
-            println "RFV: $reducedFeatVec"
+            def reducedFeatVec = featVec[0..<axis]
+            reducedFeatVec << featVec[(axis+1)..(-1)]
             resultingDataSet << reducedFeatVec.flatten()
         }
     }

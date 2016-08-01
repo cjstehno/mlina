@@ -32,8 +32,8 @@ def splitDataSet(dataSet, axis, value):
     for featVec in dataSet:
         if featVec[axis] == value:
             reducedFeatVec = featVec[:axis]
+            print "CHECK: ", reducedFeatVec
             reducedFeatVec.extend(featVec[axis+1:])
-            print reducedFeatVec
             retDataSet.append(reducedFeatVec)
     return retDataSet
 
