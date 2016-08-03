@@ -88,12 +88,11 @@ def createTree(dataSet, labels){
     def myTree = [(bestFeatLabel):[:]]
     labels.remove(bestFeat)
 
-    def featValues = dataSet.collect { it[bestFeat] }
-    def uniqeVals = featValues.unique()
-    uniqeVals.each { value->
+    dataSet.collect { it[bestFeat] }.unique().each { value->
         def subLabels = labels.clone()
         myTree[bestFeatLabel][value] = createTree(splitDataSet(dataSet, bestFeat, value), subLabels)
     }
+
     myTree
 }
 
