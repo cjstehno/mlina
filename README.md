@@ -10,9 +10,10 @@ Groovy so that I have something I might actually use and understand at a later d
 
 Some Java libraries that came in handy:
 
-* http://jscience.org/api/index.html
-* http://commons.apache.org/proper/commons-math/
-* http://www.jfree.org/jfreechart/api.html
+* http://jscience.org/api/index.html - Java science library
+* http://commons.apache.org/proper/commons-math/ - Java advanced math library
+* http://www.jfree.org/jfreechart/api.html - Java charting/graphing library
+* http://www.graphviz.org/ - diagram rendering language and tool
 
 ## Book Errata
 
