@@ -96,7 +96,32 @@ def createTree(dataSet, labels){
     myTree
 }
 
-def data = createDataSet()
+def classify(inputTree, featLabels, testVec){
+    String firstStr = inputTree.keySet().iterator().next()
+    def secondDict = inputTree[firstStr]
+    int featIndex = featLabels.indexOf(firstStr)
+
+    String classLabel
+    secondDict.keySet().each { key->
+        if( testVec[featIndex] == key){
+            if( secondDict[key] instanceof Map){
+                classLabel = classify(secondDict[key], featLabels, testVec)
+            } else {
+                classLabel = secondDict[key]
+            }
+        }
+    }
+    classLabel
+}
+
+def retrieveTree(int i){
+    [
+        ['no surfacing': [0: 'no', 1: ['flippers': [0: 'no', 1: 'yes']]]],
+        ['no surfacing': [0: 'no', 1: ['flippers': [0: ['head': [0: 'no', 1: 'yes']], 1: 'no']]]]
+    ][i]
+}
+
+//def data = createDataSet()
 //println calcShannonEntropy(data)
 
 //println splitDataSet(data.second, 0,1)
@@ -104,4 +129,10 @@ def data = createDataSet()
 
 //println chooseBestFeatureToSplit(data.second)
 
-println createTree(data.second, data.first)
+//println createTree(data.second, data.first)
+
+def data = createDataSet()
+def tree = retrieveTree(0)
+println tree
+println classify(tree, data.first, [1,0])
+println classify(tree, data.first, [1,1])

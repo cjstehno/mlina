@@ -83,6 +83,25 @@ def createTree(dataSet,labels):
     return myTree
 
 
+def classify(inputTree, featLables, testVec):
+    firstStr = inputTree.keys()[0]
+    secondDict = inputTree[firstStr]
+    featIndex = featLables.index(firstStr)
+    for key in secondDict.keys():
+        if testVec[featIndex] == key:
+            if type(secondDict[key]).__name__ == 'dict':
+                classLabel = classify(secondDict[key], featLables, testVec)
+            else: classLabel = secondDict[key]
+    return classLabel
+
+
+def retrieveTree(i):
+    listOfTrees =[
+        {'no surfacing': {0: 'no', 1: {'flippers': {0: 'no', 1: 'yes'}}}},
+        {'no surfacing': {0: 'no', 1: {'flippers': {0: {'head': {0: 'no', 1: 'yes'}}, 1: 'no'}}}}
+    ]
+    return listOfTrees[i]
+
 myDat, labels = createDataSet()
 # print myDat
 # print calcShannonEnt(myDat)
@@ -92,5 +111,11 @@ myDat, labels = createDataSet()
 
 # print chooseBestFeatureToSplit(myDat)
 
-myTree = createTree(myDat, labels)
+# myTree = createTree(myDat, labels)
+# print myTree
+
+myDat, labels = createDataSet()
+myTree = retrieveTree(0)
 print myTree
+print classify(myTree, labels, [1,0])
+print classify(myTree, labels, [1,1])
