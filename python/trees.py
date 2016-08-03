@@ -102,6 +102,20 @@ def retrieveTree(i):
     ]
     return listOfTrees[i]
 
+
+def storeTree(inputTree, filename):
+    import pickle
+    fw = open(filename, 'w')
+    pickle.dump(inputTree,fw)
+    fw.close()
+
+
+def grapTree(filename):
+    import pickle
+    fr = open(filename)
+    return pickle.load(fr)
+
+
 myDat, labels = createDataSet()
 # print myDat
 # print calcShannonEnt(myDat)
@@ -119,3 +133,6 @@ myTree = retrieveTree(0)
 print myTree
 print classify(myTree, labels, [1,0])
 print classify(myTree, labels, [1,1])
+
+storeTree(myTree, 'classifierStorage.txt')
+print grapTree('classifierStorage.txt')

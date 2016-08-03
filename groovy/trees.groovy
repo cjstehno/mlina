@@ -1,11 +1,14 @@
 @Grapes(
     value = [
         @Grab('org.apache.commons:commons-math3:3.6.1'),
-        @Grab('org.jfree:jfreechart:1.0.19')
+        @Grab('org.jfree:jfreechart:1.0.19'),
+        @Grab('org.apache.commons:commons-lang3:3.4')
     ]
 )
 
 import static org.apache.commons.math3.util.FastMath.log
+import static org.apache.commons.lang3.SerializationUtils.serialize
+import static org.apache.commons.lang3.SerializationUtils.deserialize
 
 def createDataSet(){
     new Tuple2(
@@ -121,6 +124,15 @@ def retrieveTree(int i){
     ][i]
 }
 
+def storeTree(inputTree, String filename){
+    new File(filename).bytes = serialize(inputTree)
+}
+
+def grabTree(String filename){
+    deserialize(new File(filename).bytes)
+}
+
+
 //def data = createDataSet()
 //println calcShannonEntropy(data)
 
@@ -136,3 +148,6 @@ def tree = retrieveTree(0)
 println tree
 println classify(tree, data.first, [1,0])
 println classify(tree, data.first, [1,1])
+
+storeTree(tree, 'classifierStorage.ser')
+print grabTree('classifierStorage.ser')
