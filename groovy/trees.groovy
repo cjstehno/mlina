@@ -22,7 +22,7 @@ def createDataSet(){
 
 def calcShannonEntropy(dataSet){
     int numEntries = dataSet.size()
-    def labelCounts = dataSet.countBy { it[2] }
+    def labelCounts = dataSet.countBy { it[-1] }
     double shannonEnt = 0.0
     labelCounts.keySet().each { key->
         def prob = ((double)labelCounts[key])/numEntries
@@ -69,10 +69,40 @@ def chooseBestFeatureToSplit(dataSet){
     bestFeature
 }
 
+def majorityCount(classList){
+    classList.countBy { it }.max { it.value }.key
+}
+
+def createTree(dataSet, labels){
+    def classList = dataSet.collect { it[-1] }
+    if( classList.count { it == classList[0] } == classList.size() ){
+        return classList[0]
+    }
+    if( dataSet[0].size() == 1){
+        return majorityCount(classList)
+    }
+
+    int bestFeat = chooseBestFeatureToSplit(dataSet)
+    def bestFeatLabel = labels[bestFeat]
+
+    def myTree = [(bestFeatLabel):[:]]
+    labels.remove(bestFeat)
+
+    def featValues = dataSet.collect { it[bestFeat] }
+    def uniqeVals = featValues.unique()
+    uniqeVals.each { value->
+        def subLabels = labels.clone()
+        myTree[bestFeatLabel][value] = createTree(splitDataSet(dataSet, bestFeat, value), subLabels)
+    }
+    myTree
+}
+
 def data = createDataSet()
 //println calcShannonEntropy(data)
 
 //println splitDataSet(data.second, 0,1)
 //println splitDataSet(data.second, 0,0)
 
-println chooseBestFeatureToSplit(data.second)
+//println chooseBestFeatureToSplit(data.second)
+
+println createTree(data.second, data.first)
