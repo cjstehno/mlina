@@ -19,3 +19,20 @@ Some Java libraries that came in handy:
 
 https://manning-content.s3.amazonaws.com/download/8/94d527f-01ea-4fe5-926a-9d0b77bed50e/Harrington_MachineLearninginAction_Err2.htm
 
+## Python
+
+The python examples are simple scripts, though some blocks were commented out or changed while working through the examples. In general they should be run via command line
+in the `python` directory of the project and they should print out relevant information.
+
+## Groovy
+
+The Groovy version of the code started out as simple scripts with Grape imports; however, as the code progressed, I converted to a Gradle-based project format to make better use 
+of the available libraries and to get better code reuse.
+ 
+If there are any scripts left when you read this, they are simply executed in the `groovy` directory of the project, on the command line.
+
+The Gradle-based project version of the code should be build with tests - the tests are the code examples, based on the Python version of the code.
+
+    ./gradlew clean build test
+    
+
