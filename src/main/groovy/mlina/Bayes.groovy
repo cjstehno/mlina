@@ -1,9 +1,10 @@
 package mlina
 
+import org.apache.commons.math3.analysis.function.Log
 import org.apache.commons.math3.linear.ArrayRealVector
 import org.apache.commons.math3.linear.RealVector
 
-import static mlina.Utils.*
+import static org.apache.commons.math3.util.FastMath.log
 
 class Bayes {
 
@@ -46,13 +47,13 @@ class Bayes {
     static List trainNB0(final List<List<Integer>> trainMatrix, final List<Integer> trainCategory) {
         int numTrainDocs = trainMatrix.size()
         int numWords = trainMatrix[0].size()
-        def pAbusive = trainCategory.sum() / numTrainDocs
+        double pAbusive = trainCategory.sum() / numTrainDocs
 
-        ArrayRealVector p0Num = new ArrayRealVector(numWords)
-        ArrayRealVector p1Num = new ArrayRealVector(numWords)
+        ArrayRealVector p0Num = new ArrayRealVector(numWords, 1.0)
+        ArrayRealVector p1Num = new ArrayRealVector(numWords, 1.0)
 
-        double p0Denom = 0.0
-        double p1Denom = 0.0
+        double p0Denom = 2.0
+        double p1Denom = 2.0
 
         numTrainDocs.times { i ->
             if (trainCategory[i] == 1) {
@@ -64,9 +65,15 @@ class Bayes {
             }
         }
 
-        RealVector p1Vect = p1Num.mapDivide(p1Denom)
-        RealVector p0Vect = p0Num.mapDivide(p0Denom)
+        RealVector p1Vect = p1Num.mapDivide(p1Denom).map(new Log())
+        RealVector p0Vect = p0Num.mapDivide(p0Denom).map(new Log())
 
         [p0Vect, p1Vect, pAbusive]
+    }
+
+    static int classifyNB(RealVector vec2Classify, RealVector p0Vec, RealVector p1Vec, double pClass1) {
+        double p1 = vec2Classify.ebeMultiply(p1Vec).toArray().sum() + log(pClass1)
+        double p0 = vec2Classify.ebeMultiply(p0Vec).toArray().sum() + log(1.0 - pClass1)
+        p1 > p0 ? 1 : 0
     }
 }
