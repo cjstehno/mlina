@@ -2,7 +2,7 @@
    @Grab('org.apache.commons:commons-math3:3.6.1')
 )
 
-import org.apache.commons.math3.linear.Array2DRowRealMatrix
+import org.apache.commons.math3.linear.*
 
 class Outputter {
 
@@ -47,5 +47,10 @@ Outputter.output sum
 
 println ''
 
-def mult = mat.multiply(twos)
-Outputter.output mult
+def smult = sum.scalarMultiply(4d)
+Outputter.output smult
+
+println ''
+
+def vec = new ArrayRealVector([10,100,1000] as double[])
+println smult.operate(vec)

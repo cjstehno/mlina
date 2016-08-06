@@ -1,8 +1,9 @@
 package mlina
 
-import static mlina.Utils.divideAllBy
-import static mlina.Utils.valueAddition
-import static mlina.Utils.zeros
+import org.apache.commons.math3.linear.ArrayRealVector
+import org.apache.commons.math3.linear.RealVector
+
+import static mlina.Utils.*
 
 class Bayes {
 
@@ -47,46 +48,25 @@ class Bayes {
         int numWords = trainMatrix[0].size()
         def pAbusive = trainCategory.sum() / numTrainDocs
 
-        List<Number> p0Num = zeros(numWords)
-        List<Number> p1Num = zeros(numWords)
+        ArrayRealVector p0Num = new ArrayRealVector(numWords)
+        ArrayRealVector p1Num = new ArrayRealVector(numWords)
 
         double p0Denom = 0.0
         double p1Denom = 0.0
 
         numTrainDocs.times { i ->
             if (trainCategory[i] == 1) {
-                p1Num = valueAddition(p1Num, trainMatrix[i])
+                p1Num = p1Num.add(new ArrayRealVector(trainMatrix[i] as double[]))
                 p1Denom += trainMatrix[i].sum()
             } else {
-                p0Num = valueAddition(p0Num, trainMatrix[i])
+                p0Num = p0Num.add(new ArrayRealVector(trainMatrix[i] as double[]))
                 p0Denom += trainMatrix[i].sum()
             }
         }
 
-        List<Number> p1Vect = divideAllBy(p1Num, p1Denom)
-        List<Number> p0Vect = divideAllBy(p0Num, p0Denom)
+        RealVector p1Vect = p1Num.mapDivide(p1Denom)
+        RealVector p0Vect = p0Num.mapDivide(p0Denom)
 
         [p0Vect, p1Vect, pAbusive]
-    }
-
-}
-
-class Utils {
-
-    static List<Double> zeros(int len) {
-        (0..<len).collect { 0 }
-    }
-
-    static List<Number> valueAddition(final List<Number> first, final List<Number> second) {
-        assert first.size() == second.size()
-        def output = []
-        first.eachWithIndex { Number value, int i ->
-            output << (value + second[i])
-        }
-        output
-    }
-
-    static List<Number> divideAllBy(final List<Number> numerators, final Number denominator) {
-        numerators.collect { Number num -> (num / denominator) }
     }
 }
