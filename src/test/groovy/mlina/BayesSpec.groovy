@@ -94,4 +94,70 @@ class BayesSpec extends Specification {
         ['love', 'my', 'dalmatian'] || 0
         ['stupid', 'garbage']       || 1
     }
+
+    def 'textParse'() {
+        setup:
+        String text = Bayes.getResource("/email/spam/1.txt").text
+
+        when:
+        def words = textParse(text)
+
+        then:
+        words == [
+            'codeine', '15mg', 'for', '20370', 'visa', 'only', 'codeine', 'methylmorphine', 'narcotic', 'opioid', 'pain', 'reliever', 'have', '15mg',
+            '30mg', 'pills', '15mg', 'for', '20370', '15mg', 'for', '38580', '15mg', 'for', '56250', 'visa', 'only'
+        ]
+    }
+
+    def 'spam classification'() {
+        setup:
+        def docList = []
+        def classList = []
+        def fullText = []
+        def random = new Random()
+
+        (1..<26).each { i ->
+            def wordList = textParse(Bayes.getResource("/email/spam/${i}.txt").text)
+            docList.add(wordList)
+            fullText.addAll(wordList)
+            classList.add(1)
+
+            wordList = textParse(Bayes.getResource("/email/ham/${i}.txt").text)
+            docList.add(wordList)
+            fullText.addAll(wordList)
+            classList.add(0)
+        }
+
+        def vocabList = createVocabList(docList)
+        def trainingSet = (0..<50).collect()
+        def testSet = []
+
+        (0..<10).each { i ->
+            int randIndex = random.nextInt(trainingSet.size())
+            testSet.add(trainingSet[randIndex])
+            trainingSet.remove(randIndex)
+        }
+
+        def trainMat = []
+        def trainClasses = []
+
+        trainingSet.each { docIndex ->
+            trainMat.add(setOfWords2Vec(vocabList, docList[docIndex]))
+            trainClasses.add(classList[docIndex])
+        }
+
+        when:
+        def (RealVector p0V, RealVector p1V, double pSpam) = trainNB0(trainMat, trainClasses)
+        int errorCount = 0
+
+        testSet.each { docIndex ->
+            def wordVector = new ArrayRealVector(setOfWords2Vec(vocabList, docList[docIndex]) as double[])
+            if (classifyNB(wordVector, p0V, p1V, pSpam) != classList[docIndex]) {
+                errorCount += 1
+            }
+        }
+
+        then:
+        println errorCount // error count is based on random training, should be low (~0)
+    }
 }

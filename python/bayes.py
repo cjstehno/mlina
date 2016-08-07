@@ -74,8 +74,53 @@ def testingNB():
     thisDoc = array(setOfWords2Vec(myVocabList, testEntry))
     print testEntry, 'classified as: ', classifyNB(thisDoc,p0V,p1V,pAb)
 
-listOfPosts, listClasses = loadDataSet()
-myVocabList = createVocabList(listOfPosts)
+
+def bagOfWords2VecMN(vocabList, inputSet):
+    returnVec = [0] * len(vocabList)
+    for word in inputSet:
+        if word in vocabList:
+            returnVec[vocabList.index(word)] += 1
+    return returnVec
+
+
+def textParse(bigString):
+    import re
+    listOfTokens = re.split(r'\W*', bigString)
+    return [tok.lower() for tok in listOfTokens if len(tok) > 2]
+
+
+def spamTest():
+    docList=[]; classList=[]; fullText=[]
+    for i in range(1,26):
+        wordList = textParse(open('../src/main/resources/email/spam/%d.txt' % i).read())
+        docList.append(wordList)
+        fullText.extend(wordList)
+        classList.append(1)
+        wordList = textParse(open('../src/main/resources/email/ham/%d.txt' % i).read())
+        docList.append(wordList)
+        fullText.extend(wordList)
+        classList.append(0)
+
+    vocabList = createVocabList(docList)
+    trainingSet = range(50); testSet=[]
+    for i in range(10):
+        randIndex = int(random.uniform(0, len(trainingSet)))
+        testSet.append(trainingSet[randIndex])
+        del(trainingSet[randIndex])
+    trainMat = []; trainClasses = []
+    for docIndex in trainingSet:
+        trainMat.append(setOfWords2Vec(vocabList, docList[docIndex]))
+        trainClasses.append(classList[docIndex])
+    p0V,p1V,pSpam = trainNB0(array(trainMat), array(trainClasses))
+    errorCount = 0
+    for docIndex in testSet:
+        wordVector = setOfWords2Vec(vocabList, docList[docIndex])
+        if classifyNB(array(wordVector), p0V, p1V, pSpam) != classList[docIndex]:
+            errorCount += 1
+    print 'the error rate is: ', float(errorCount)/len(testSet)
+
+# listOfPosts, listClasses = loadDataSet()
+# myVocabList = createVocabList(listOfPosts)
 # print myVocabList
 
 # print setOfWords2Vec(myVocabList, listOfPosts[0])
@@ -85,15 +130,15 @@ myVocabList = createVocabList(listOfPosts)
 # [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1]
 # [0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
 
-trainMat = []
-for postinDoc in listOfPosts:
-    trainMat.append(setOfWords2Vec(myVocabList, postinDoc))
-
-
-p0V,p1V,pAb = trainNB0(trainMat, listClasses)
-print p0V
-print p1V
-print pAb
+# trainMat = []
+# for postinDoc in listOfPosts:
+#     trainMat.append(setOfWords2Vec(myVocabList, postinDoc))
+#
+#
+# p0V,p1V,pAb = trainNB0(trainMat, listClasses)
+# print p0V
+# print p1V
+# print pAb
 
 # [ 0.04166667  0.04166667  0.04166667  0.          0.          0.04166667
 #   0.04166667  0.04166667  0.          0.04166667  0.04166667  0.04166667
@@ -108,4 +153,8 @@ print pAb
 #   0.          0.15789474  0.          0.05263158  0.          0.          0.        ]
 # 0.5
 
-testingNB()
+print textParse(open('../src/main/resources/email/spam/1.txt' ).read())
+
+# testingNB()
+
+spamTest()

@@ -76,4 +76,20 @@ class Bayes {
         double p0 = vec2Classify.ebeMultiply(p0Vec).toArray().sum() + log(1.0 - pClass1)
         p1 > p0 ? 1 : 0
     }
+
+    static List<Integer> bagOfWords2VecMN(final List<String> vocabList, final List<Integer> inputSet) {
+        def returnVec = new int[vocabList.size()]
+        inputSet.each { word ->
+            if (word in vocabList) {
+                returnVec[vocabList.indexOf(word)] += 1
+            }
+        }
+        returnVec as List<Integer>
+    }
+
+    static List<String> textParse(String bigString) {
+        bigString.split(/\W* |\//).collect {
+            it.toLowerCase().replaceAll(/\p{Punct}/, '').trim()
+        }.findAll { it.trim().length() > 2 }
+    }
 }
