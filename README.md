@@ -6,6 +6,12 @@ The contents of this project are based on the code developed during the reading 
 The example code in the book is written in Python. While I am learning the concepts and working along with the Python examples, I am also converting them to 
 Groovy so that I have something I might actually use and understand at a later date.
 
+I have made every effort to keep the Python to Groovy conversion as true to the original source code
+as possible; however, since this learning effort is focussed more on the concepts than on the implementations, 
+there may be some errors in the Groovy implementations - I would recommend finding existing implementations
+or doing a thorough investigation of the code against the algorithm to ensure adequacy before using in
+any real application.
+
 ## Useful Libraries
 
 Some Java libraries that came in handy:

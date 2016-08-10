@@ -31,7 +31,6 @@ def gradAscent(dataMatIn, classLabels):
 def plotBestFit(wei):
     import matplotlib.pyplot as plt
     weights = wei.getA()
-    print weights
     dataMat,labelMat = loadDataSet()
     dataArr = array(dataMat)
     n = shape(dataArr)[0]
@@ -56,8 +55,23 @@ def plotBestFit(wei):
     plt.show()
 
 
-dataArr,labelMat = loadDataSet()
-weights = gradAscent(dataArr, labelMat)
-print weights
+def stocGradAscent0(dataMatrix, classLabels):
+    m,n = shape(dataMatrix)
+    alpha = 0.01
+    weights = ones(n)
+    for i in range(m):
+        h = sigmoid(sum(dataMatrix[i] * weights))
+        error = classLabels[i] - h
+        weights = weights + alpha * error * dataMatrix[i]
+    return weights
 
-plotBestFit(weights)
+
+
+dataArr,labelMat = loadDataSet()
+# weights = gradAscent(dataArr, labelMat)
+# print weights
+# plotBestFit(weights)
+
+weights = stocGradAscent0(array(dataArr), labelMat)
+print weights
+plotBestFit(mat(weights).transpose())

@@ -1,8 +1,11 @@
 package mlina
 
 import groovy.transform.TypeChecked
+import org.apache.commons.math3.analysis.UnivariateFunction
 import org.apache.commons.math3.linear.Array2DRowRealMatrix
+import org.apache.commons.math3.linear.ArrayRealVector
 import org.apache.commons.math3.linear.DefaultRealMatrixChangingVisitor
+import org.apache.commons.math3.linear.RealVector
 import org.jfree.chart.ChartFactory
 import org.jfree.chart.JFreeChart
 import org.jfree.chart.annotations.XYLineAnnotation
@@ -45,6 +48,30 @@ class LogRegres {
 
             Array2DRowRealMatrix error = labelMat.subtract(h)
             weights = weights.add(dataMatrix.transpose().scalarMultiply(alpha).multiply(error))
+        }
+
+        weights
+    }
+
+    static RealVector stocGradAscent0(List<List<Double>> dataMat, List<Integer> classLabels) {
+        Array2DRowRealMatrix dataMatrix = new Array2DRowRealMatrix(dataMat.size(), dataMat[0].size())
+        dataMat.eachWithIndex { row, idx ->
+            dataMatrix.setRow(idx, row as double[])
+        }
+
+        RealVector labelVec = new ArrayRealVector(classLabels as double[])
+
+        int m = dataMatrix.rowDimension
+        int n = dataMatrix.columnDimension
+        double alpha = 0.01
+
+        RealVector weights = new ArrayRealVector(n, 1.0)
+
+        (0..<m).each { k ->
+            double h = SigmoidFunction.instance.value(dataMatrix.getRowVector(k).ebeMultiply(weights).toArray().sum())
+
+            double error = labelVec.getEntry(k) - h
+            weights = weights.add(dataMatrix.getRowVector(k).mapMultiply(alpha * error))
         }
 
         weights
@@ -96,9 +123,20 @@ class LogRegres {
 @TypeChecked
 class SigmoidWalker extends DefaultRealMatrixChangingVisitor {
 
+    private final SigmoidFunction fn = new SigmoidFunction()
+
     @Override
     double visit(int row, int column, double value) {
-        return sigmoid(value)
+        fn.value(value)
+    }
+}
+
+@TypeChecked @Singleton
+class SigmoidFunction implements UnivariateFunction {
+
+    @Override
+    double value(double v) {
+        sigmoid(v)
     }
 
     static double sigmoid(double inX) {
