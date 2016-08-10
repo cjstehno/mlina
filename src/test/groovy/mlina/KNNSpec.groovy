@@ -74,4 +74,16 @@ class KNNSpec extends Specification {
         100        | 10000    | 10        | 'smallDoses'
         68846      | 9.974715 | 0.669787 || 'smallDoses'
     }
+
+    def 'plotting'(){
+        setup:
+        def data = fileData('/datingTestSet.txt')
+        def file = new File(System.getProperty('user.home'), 'knn-plot.png')
+
+        when:
+        KNN.plotDataSet(data, file)
+
+        then:
+        file.exists()
+    }
 }

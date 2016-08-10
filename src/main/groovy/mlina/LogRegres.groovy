@@ -3,6 +3,13 @@ package mlina
 import groovy.transform.TypeChecked
 import org.apache.commons.math3.linear.Array2DRowRealMatrix
 import org.apache.commons.math3.linear.DefaultRealMatrixChangingVisitor
+import org.jfree.chart.ChartFactory
+import org.jfree.chart.JFreeChart
+import org.jfree.chart.annotations.XYLineAnnotation
+import org.jfree.data.xy.DefaultXYDataset
+
+import javax.imageio.ImageIO
+import java.awt.image.BufferedImage
 
 import static java.lang.Math.exp
 
@@ -41,6 +48,48 @@ class LogRegres {
         }
 
         weights
+    }
+
+    static void plotBestFit(Array2DRowRealMatrix wei, File file) {
+        def data = loadDataSet()
+        def dataArr = data.first
+        def n = dataArr.size()
+        double[] weights = wei.getColumn(0)
+
+        def xcord1 = []
+        def ycord1 = []
+        def xcord2 = []
+        def ycord2 = []
+
+        (0..<n).each { i ->
+            if (data.second[i] == 1) {
+                xcord1 << dataArr[i][1]
+                ycord1 << dataArr[i][2]
+            } else {
+                xcord2 << dataArr[i][1]
+                ycord2 << dataArr[i][2]
+            }
+        }
+
+        def xyDataSet = new DefaultXYDataset()
+        xyDataSet.addSeries('X1', [xcord1, ycord1] as double[][])
+        xyDataSet.addSeries('X2', [xcord2, ycord2] as double[][])
+
+        JFreeChart chart = ChartFactory.createScatterPlot('LogRegres', 'X', 'Y', xyDataSet)
+
+        double y1 = (-weights[0] - weights[1] * (-3.0)) / weights[2]
+
+        double y2 = (-weights[0] - weights[1] * (3.0)) / weights[2]
+
+        chart.getXYPlot().addAnnotation(new XYLineAnnotation(
+            -3.0,
+            y1,
+            3.0,
+            y2,
+        ))
+
+        BufferedImage image = chart.createBufferedImage(800, 600)
+        ImageIO.write(image, 'png', file)
     }
 }
 

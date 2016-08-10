@@ -22,4 +22,17 @@ class LogRegresSpec extends Specification {
             [-0.6168481970344017] as double[]
         ] as double[][])
     }
+
+    def 'plotting'() {
+        setup:
+        def data = loadDataSet()
+        def weights = gradAscent(data.first, data.second)
+        def file = new File(System.getProperty('user.home'), 'logregres-plot.png')
+
+        when:
+        LogRegres.plotBestFit(weights, file)
+
+        then:
+        file.exists()
+    }
 }

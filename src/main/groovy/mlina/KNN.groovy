@@ -3,7 +3,11 @@ package mlina
 import org.apache.commons.math3.linear.Array2DRowRealMatrix
 import org.jfree.chart.ChartFactory
 import org.jfree.chart.ChartFrame
+import org.jfree.chart.JFreeChart
 import org.jfree.data.xy.DefaultXYDataset
+
+import javax.imageio.ImageIO
+import java.awt.image.BufferedImage
 
 import static org.apache.commons.math3.util.MathArrays.distance
 
@@ -87,7 +91,7 @@ class KNN {
         classification
     }
 
-    static void plotDataSet(Tuple2<List<String>, Array2DRowRealMatrix> data) {
+    static void plotDataSet(Tuple2<List<String>, Array2DRowRealMatrix> data, File file) {
         def groupIndices = [:]
         data.first.eachWithIndex { g, i ->
             if (groupIndices.containsKey(g)) {
@@ -104,13 +108,18 @@ class KNN {
             xyDataSet.addSeries(g, [groupMtx.getColumn(1), groupMtx.getColumn(2)] as double[][])
         }
 
-        def frame = new ChartFrame('Charting', ChartFactory.createScatterPlot(
+        JFreeChart chart = ChartFactory.createScatterPlot(
             'Dating Test',
             'Percentage Time Spent Playing Video Games',
             'Liters of Ice Cream Consumed Per Week',
             xyDataSet
-        ))
-        frame.setSize(800, 600)
-        frame.visible = true
+        )
+
+//        def frame = new ChartFrame('Charting', chart)
+//        frame.setSize(800, 600)
+//        frame.visible = true
+
+        BufferedImage image = chart.createBufferedImage(800,600)
+        ImageIO.write(image, 'png', file)
     }
 }
