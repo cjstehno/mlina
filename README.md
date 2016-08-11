@@ -20,6 +20,7 @@ Some Java libraries that came in handy:
 * http://commons.apache.org/proper/commons-math/ - Java advanced math library
 * http://www.jfree.org/jfreechart/api.html - Java charting/graphing library
 * http://www.graphviz.org/ - diagram rendering language and tool
+* http://nd4j.org - high-performance array/math library with an interface similar to numpy.
 
 ## Book Errata
 

@@ -77,6 +77,44 @@ class LogRegres {
         weights
     }
 
+    static RealVector stocGradAscent1(List<List<Double>> dataMat, List<Integer> classLabels, int numIter=150){
+        int m = dataMat.size()
+        int n = dataMat[0].size()
+
+        Random random = new Random()
+
+        RealVector weights = new ArrayRealVector(n, 1.0)
+
+        (0..<numIter).each { j->
+            def dataIndex = (0..<m)
+            (0..<m).each { i->
+                double alpha = 4/(1.0+j+i)+0.01
+                int randIndex = random.nextInt(dataIndex.size())
+
+                // FIXME: this is where I left off
+                double h = SigmoidFunction.sigmoid(dataMat[randIndex] )
+            }
+        }
+    }
+
+    /*
+def stocGradAscent1(dataMatrix, classLabels, numIter=150):
+    m,n = shape(dataMatrix)
+    weights = ones(n)
+    for j in range(numIter):
+        dataIndex = range(m)
+        for i in range(m):
+            alpha = 4/(1.0+j+i)+0.01
+            randIndex = int(random.uniform(0,len(dataIndex)))
+            h = sigmoid(sum(dataMatrix[randIndex]*weights))
+            error = classLabels[randIndex] - h
+            weights = weights + alpha * error * dataMatrix[randIndex]
+            del(dataIndex[randIndex])
+    return weights
+
+    [ 14.286994     1.12616186  -2.23537849]
+     */
+
     static void plotBestFit(Array2DRowRealMatrix wei, File file) {
         def data = loadDataSet()
         def dataArr = data.first
