@@ -2,21 +2,20 @@ package mlina
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix
 import org.jfree.chart.ChartFactory
-import org.jfree.chart.ChartFrame
 import org.jfree.chart.JFreeChart
 import org.jfree.data.xy.DefaultXYDataset
+import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.factory.Nd4j
 
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
 
-import static org.apache.commons.math3.util.MathArrays.distance
-
 class KNN {
 
-    static Tuple2<List<String>, Array2DRowRealMatrix> createDataSet() {
+    static Tuple2<List<String>, INDArray> createDataSet() {
         new Tuple2(
             ['A', 'A', 'B', 'B'],
-            new Array2DRowRealMatrix([
+            Nd4j.create([
                 [1.0, 1.1],
                 [1.0, 1.0],
                 [0.0, 0.0],
@@ -25,26 +24,26 @@ class KNN {
         )
     }
 
-    static String classify0(List<Double> inX, Tuple2<List<String>, Array2DRowRealMatrix> dataSet, int k) {
+    static String classify0(double[] inX, Tuple2<List<String>, INDArray> dataSet, int k) {
         def distances = []
 
-        dataSet.second.rowDimension.times { row ->
+        dataSet.second.rows().times { row ->
             distances << new Tuple2<>(
                 dataSet.first[row],
-                distance(dataSet.second.getRow(row), inX as double[])
+                dataSet.second.getRow(row).distance2(Nd4j.create(inX))
             )
         }
 
         distances.sort { it.second }.take(k).countBy { it.first }.max { it.value }.key
     }
 
-    static List autoNorm(Tuple2<List<String>, Array2DRowRealMatrix> dataSet) {
+    static List autoNorm(Tuple2<List<String>, INDArray> dataSet) {
         def mins = []
         def maxs = []
 
-        dataSet.second.columnDimension.times { c ->
-            mins << (dataSet.second.getColumn(c) as Collection).min()
-            maxs << (dataSet.second.getColumn(c) as Collection).max()
+        dataSet.second.columns().times { c ->
+            mins << dataSet.second.getColumn(c).min()
+            maxs << dataSet.second.getColumn(c).max()
         }
 
         def ranges = []
@@ -52,12 +51,10 @@ class KNN {
             ranges << m - mins[i]
         }
 
-        def normData = new Array2DRowRealMatrix(dataSet.second.rowDimension, dataSet.second.columnDimension)
+        INDArray normData = Nd4j.create(dataSet.second.rows(), dataSet.second.columns())
 
-        dataSet.second.columnDimension.times { c ->
-            normData.setColumn(c, dataSet.second.getColumn(c).collect { d ->
-                (d - mins[c]) / (maxs[c] - mins[c])
-            } as double[])
+        dataSet.second.columns().times { c ->
+            normData.putColumn(c, dataSet.second.getColumn(c).sub(mins[c] as double).div((maxs[c] - mins[c]) as double))
         }
 
         [normData, ranges, mins]
@@ -119,7 +116,7 @@ class KNN {
 //        frame.setSize(800, 600)
 //        frame.visible = true
 
-        BufferedImage image = chart.createBufferedImage(800,600)
+        BufferedImage image = chart.createBufferedImage(800, 600)
         ImageIO.write(image, 'png', file)
     }
 }

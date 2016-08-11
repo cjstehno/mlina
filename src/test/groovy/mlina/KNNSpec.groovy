@@ -1,10 +1,15 @@
 package mlina
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix
+import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.factory.Nd4j
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static mlina.KNN.*
+import static mlina.KNN.autoNorm
+import static mlina.KNN.classify0
+import static mlina.KNN.createDataSet
+import static mlina.KNN.fileData
 
 class KNNSpec extends Specification {
 
@@ -13,7 +18,7 @@ class KNNSpec extends Specification {
         def data = createDataSet()
 
         expect:
-        KNN.classify0(input, data, k) == result
+        classify0(input as double[], data, k) == result
 
         where:
         input      | k || result
@@ -27,10 +32,10 @@ class KNNSpec extends Specification {
         def data = createDataSet()
 
         when:
-        def (Array2DRowRealMatrix norms, ranges, mins) = autoNorm(data)
+        def (INDArray norms, ranges, mins) = autoNorm(data)
 
         then:
-        norms == new Array2DRowRealMatrix([
+        norms == Nd4j.create([
             [1.0, 1.0],
             [1.0, 0.9090909090909091],
             [0.0, 0.0],
@@ -75,7 +80,7 @@ class KNNSpec extends Specification {
         68846      | 9.974715 | 0.669787 || 'smallDoses'
     }
 
-    def 'plotting'(){
+    def 'plotting'() {
         setup:
         def data = fileData('/datingTestSet.txt')
         def file = new File(System.getProperty('user.home'), 'knn-plot.png')
