@@ -6,6 +6,7 @@ import org.jfree.chart.JFreeChart
 import org.jfree.data.xy.DefaultXYDataset
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
+import org.nd4j.linalg.indexing.NDArrayIndex
 
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
@@ -24,13 +25,13 @@ class KNN {
         )
     }
 
-    static String classify0(double[] inX, Tuple2<List<String>, INDArray> dataSet, int k) {
+    static String classify0(INDArray inX, Tuple2<List<String>, INDArray> dataSet, int k) {
         def distances = []
 
         dataSet.second.rows().times { row ->
             distances << new Tuple2<>(
                 dataSet.first[row],
-                dataSet.second.getRow(row).distance2(Nd4j.create(inX))
+                dataSet.second.getRow(row).distance2(inX)
             )
         }
 
@@ -42,8 +43,10 @@ class KNN {
         def maxs = []
 
         dataSet.second.columns().times { c ->
-            mins << dataSet.second.getColumn(c).min()
-            maxs << dataSet.second.getColumn(c).max()
+            dataSet.second.getColumn(c).with { column ->
+                mins << column.minNumber()
+                maxs << column.maxNumber()
+            }
         }
 
         def ranges = []
@@ -60,7 +63,7 @@ class KNN {
         [normData, ranges, mins]
     }
 
-    static Tuple2<List<String>, Array2DRowRealMatrix> fileData(String filename) {
+    static Tuple2<List<String>, INDArray> fileData(String filename) {
         def groups = []
         def rows = []
 
@@ -70,25 +73,21 @@ class KNN {
             rows << (cols[0..(-2)] as double[])
         }
 
-        new Tuple2(groups, new Array2DRowRealMatrix(rows as double[][]))
+        new Tuple2(groups, Nd4j.create(rows as double[][]))
     }
 
     static String classifyPerson(double playingVg, double ffMiles, double iceCream) {
         def dataSet = fileData('/datingTestSet.txt')
-        def (normData, ranges, mins) = autoNorm(dataSet)
+        def (normData, double[] ranges, double[] mins) = autoNorm(dataSet)
 
-        println normData
-
-        def classification = classify0([
+        classify0(Nd4j.create([
             (ffMiles - mins[0]) / ranges[0],
             (playingVg - mins[1]) / ranges[1],
             (iceCream - mins[2]) / ranges[2]
-        ] as List<Double>, dataSet, 3)
-
-        classification
+        ] as double[]), dataSet, 3)
     }
 
-    static void plotDataSet(Tuple2<List<String>, Array2DRowRealMatrix> data, File file) {
+    static void plotDataSet(Tuple2<List<String>, INDArray> data, File file) {
         def groupIndices = [:]
         data.first.eachWithIndex { g, i ->
             if (groupIndices.containsKey(g)) {
@@ -100,9 +99,10 @@ class KNN {
 
         def xyDataSet = new DefaultXYDataset()
 
-        groupIndices.each { g, indices ->
-            def groupMtx = data.second.getSubMatrix(indices as int[], [0, 1, 2] as int[])
-            xyDataSet.addSeries(g, [groupMtx.getColumn(1), groupMtx.getColumn(2)] as double[][])
+        groupIndices.each { String g, indices ->
+            def groupMtx = data.second.getRows(indices as int[])
+            println groupMtx
+            xyDataSet.addSeries(g, [groupMtx.getColumn(1).data().asDouble(), groupMtx.getColumn(2).data().asDouble()] as double[][])
         }
 
         JFreeChart chart = ChartFactory.createScatterPlot(
@@ -112,9 +112,9 @@ class KNN {
             xyDataSet
         )
 
-//        def frame = new ChartFrame('Charting', chart)
-//        frame.setSize(800, 600)
-//        frame.visible = true
+        //        def frame = new ChartFrame('Charting', chart)
+        //        frame.setSize(800, 600)
+        //        frame.visible = true
 
         BufferedImage image = chart.createBufferedImage(800, 600)
         ImageIO.write(image, 'png', file)

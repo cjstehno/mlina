@@ -1,15 +1,13 @@
 package mlina
 
-import org.apache.commons.math3.linear.Array2DRowRealMatrix
+import groovy.transform.CompileStatic
+import org.nd4j.linalg.api.iter.INDArrayIterator
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.factory.Nd4j
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static mlina.KNN.autoNorm
-import static mlina.KNN.classify0
-import static mlina.KNN.createDataSet
-import static mlina.KNN.fileData
+import static mlina.KNN.*
 
 class KNNSpec extends Specification {
 
@@ -18,7 +16,7 @@ class KNNSpec extends Specification {
         def data = createDataSet()
 
         expect:
-        classify0(input as double[], data, k) == result
+        classify0(Nd4j.create(input as double[]), data, k) == result
 
         where:
         input      | k || result
@@ -42,8 +40,7 @@ class KNNSpec extends Specification {
             [0.0, 0.09090909090909091]
         ] as double[][])
 
-        ranges == [1.0, 1.1]
-
+        ranges == [1.0, 1.100000023841858]
         mins == [0.0, 0.0]
     }
 
@@ -52,14 +49,14 @@ class KNNSpec extends Specification {
         def hoRatio = 0.10
         def data = fileData('/datingTestSet.txt')
 
-        def (Array2DRowRealMatrix norms, ranges, mins) = autoNorm(data)
+        def (INDArray norms, ranges, mins) = autoNorm(data)
 
-        int testVectors = norms.rowDimension * hoRatio
+        int testVectors = norms.rows() * hoRatio
         int errorCount = 0
 
         when:
         testVectors.times { i ->
-            def classification = classify0(norms.getRow(i) as List<Double>, new Tuple2<List<String>, Array2DRowRealMatrix>(data.first, norms), 3)
+            def classification = classify0(norms.getRow(i), new Tuple2<List<String>, INDArray>(data.first, norms), 3)
             println "Classifier came back with: ${classification}, the real answer is: ${data.first[i]}"
             if (classification != data.first[i]) {
                 errorCount++
@@ -72,12 +69,24 @@ class KNNSpec extends Specification {
 
     def 'dating classification'() {
         expect:
-        KNN.classifyPerson(videoGames, miles, iceCream) == result
+        classifyPerson(videoGames, miles, iceCream) == result
 
         where:
         videoGames | miles    | iceCream || result
-        100        | 10000    | 10        | 'smallDoses'
+        100        | 10000    | 10       || 'smallDoses'
         68846      | 9.974715 | 0.669787 || 'smallDoses'
+    }
+
+    def 'foo'() {
+        setup:
+        def array = Nd4j.create([[1, 2, 3], [4, 5, 6]] as double[][])
+
+        when:
+        def data = array.getColumn(1)
+        def values = new INDArrayIterator(data).collect()
+
+        then:
+        println array
     }
 
     def 'plotting'() {
@@ -86,9 +95,19 @@ class KNNSpec extends Specification {
         def file = new File(System.getProperty('user.home'), 'knn-plot.png')
 
         when:
-        KNN.plotDataSet(data, file)
+        plotDataSet(data, file)
 
         then:
         file.exists()
+    }
+}
+
+@CompileStatic
+class Grid {
+
+    private final data
+
+    Grid(double[][] data) {
+        this.data = data
     }
 }
