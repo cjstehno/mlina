@@ -93,4 +93,4 @@ print weights
 
 weights = stocGradAscent1(array(dataArr), labelMat)
 print weights
-plotBestFit(mat(weights).transpose())
+# plotBestFit(mat(weights).transpose())

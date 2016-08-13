@@ -77,7 +77,7 @@ class LogRegres {
         weights
     }
 
-    static RealVector stocGradAscent1(List<List<Double>> dataMat, List<Integer> classLabels, int numIter=150){
+    static RealVector stocGradAscent1(List<List<Double>> dataMat, List<Integer> classLabels, int numIter = 150) {
         int m = dataMat.size()
         int n = dataMat[0].size()
 
@@ -85,35 +85,23 @@ class LogRegres {
 
         RealVector weights = new ArrayRealVector(n, 1.0)
 
-        (0..<numIter).each { j->
-            def dataIndex = (0..<m)
-            (0..<m).each { i->
-                double alpha = 4/(1.0+j+i)+0.01
+        (0..<numIter).each { j ->
+            def dataIndex = (0..<m).collect()
+            (0..<m).each { i ->
+                double alpha = 4 / (1.0 + j + i) + 0.01
                 int randIndex = random.nextInt(dataIndex.size())
 
-                // FIXME: this is where I left off
-                double h = SigmoidFunction.sigmoid(dataMat[randIndex] )
+                RealVector dataVec = new ArrayRealVector(dataMat[randIndex] as double[])
+                double h = SigmoidFunction.sigmoid(dataVec.ebeMultiply(weights).dataRef.sum())
+                def error = classLabels[randIndex] - h
+
+                weights = weights.add(dataVec.mapMultiply(error * alpha))
+                dataIndex.remove(randIndex)
             }
         }
+
+        weights
     }
-
-    /*
-def stocGradAscent1(dataMatrix, classLabels, numIter=150):
-    m,n = shape(dataMatrix)
-    weights = ones(n)
-    for j in range(numIter):
-        dataIndex = range(m)
-        for i in range(m):
-            alpha = 4/(1.0+j+i)+0.01
-            randIndex = int(random.uniform(0,len(dataIndex)))
-            h = sigmoid(sum(dataMatrix[randIndex]*weights))
-            error = classLabels[randIndex] - h
-            weights = weights + alpha * error * dataMatrix[randIndex]
-            del(dataIndex[randIndex])
-    return weights
-
-    [ 14.286994     1.12616186  -2.23537849]
-     */
 
     static void plotBestFit(Array2DRowRealMatrix wei, File file) {
         def data = loadDataSet()
@@ -161,7 +149,7 @@ def stocGradAscent1(dataMatrix, classLabels, numIter=150):
 @TypeChecked
 class SigmoidWalker extends DefaultRealMatrixChangingVisitor {
 
-    private final SigmoidFunction fn = new SigmoidFunction()
+    private final SigmoidFunction fn = SigmoidFunction.instance
 
     @Override
     double visit(int row, int column, double value) {
@@ -169,7 +157,7 @@ class SigmoidWalker extends DefaultRealMatrixChangingVisitor {
     }
 }
 
-@TypeChecked @Singleton
+@TypeChecked @Singleton // TODO: Apache Math does have a sigmoid impl - compare it
 class SigmoidFunction implements UnivariateFunction {
 
     @Override
