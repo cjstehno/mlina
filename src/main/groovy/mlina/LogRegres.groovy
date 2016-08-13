@@ -144,6 +144,11 @@ class LogRegres {
         BufferedImage image = chart.createBufferedImage(800, 600)
         ImageIO.write(image, 'png', file)
     }
+
+    static int classifyVector(double[] inX, RealVector weights) {
+        def prob = SigmoidFunction.sigmoid(new ArrayRealVector(inX).ebeMultiply(weights).dataRef.sum())
+        prob > 0.5 ? 1.0 : 0.0
+    }
 }
 
 @TypeChecked
