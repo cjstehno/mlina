@@ -21,6 +21,7 @@ Some Java libraries that came in handy:
 * http://www.jfree.org/jfreechart/api.html - Java charting/graphing library
 * http://www.graphviz.org/ - diagram rendering language and tool
 * http://nd4j.org - high-performance array/math library with an interface similar to numpy.
+* http://java-ml.sourceforge.net/api/0.1.7/ - Java machine learning API
 
 ## Book Errata
 
