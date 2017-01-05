@@ -22,6 +22,7 @@ Some Java libraries that came in handy:
 * http://www.graphviz.org/ - diagram rendering language and tool
 * http://nd4j.org - high-performance array/math library with an interface similar to numpy.
 * http://java-ml.sourceforge.net/api/0.1.7/ - Java machine learning API
+* https://github.com/josephmisiti/awesome-machine-learning - machine learning links
 
 ## Book Errata
 
